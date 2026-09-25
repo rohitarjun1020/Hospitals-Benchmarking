@@ -1,0 +1,999 @@
+<!doctype html>
+<title>Hospital Benchmark FY26</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #f3f5f2;
+  --surface: #ffffff;
+  --surface-2: #eaeee9;
+  --ink: #142320;
+  --ink-2: #46544e;
+  --muted: #6c7973;
+  --line: #d9e0db;
+  --line-2: #c3ccc6;
+  --inverse: #ffffff;
+  --segA: #2a78d6;
+  --segB: #eb6834;
+  --segC: #1baf7a;
+  --good: #0a7d0a;
+  --hl: #fff4c9;
+  --shadow: 0 1px 2px rgb(20 35 32 / .06), 0 8px 24px rgb(20 35 32 / .08);
+  --display: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0e1311;
+    --surface: #161c1a;
+    --surface-2: #1f2724;
+    --ink: #e8eeea;
+    --ink-2: #b2bdb7;
+    --muted: #8a9690;
+    --line: #29322f;
+    --line-2: #3a4540;
+    --inverse: #0e1311;
+    --segA: #3987e5;
+    --segB: #d95926;
+    --segC: #199e70;
+    --good: #3fbf5a;
+    --hl: #3a3417;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px rgb(0 0 0 / .35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e1311;
+  --surface: #161c1a;
+  --surface-2: #1f2724;
+  --ink: #e8eeea;
+  --ink-2: #b2bdb7;
+  --muted: #8a9690;
+  --line: #29322f;
+  --line-2: #3a4540;
+  --inverse: #0e1311;
+  --segA: #3987e5;
+  --segB: #d95926;
+  --segC: #199e70;
+  --good: #3fbf5a;
+  --hl: #3a3417;
+  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px rgb(0 0 0 / .35);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); line-height: 1.1; }
+h2 { font-size: 1.35rem; line-height: 1.2; }
+h3 { font-size: 1.05rem; line-height: 1.3; }
+p { margin: 0; }
+a { color: inherit; text-underline-offset: 2px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 3px; }
+.num { font-variant-numeric: tabular-nums; }
+.eyebrow { font: 500 11px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.prose { max-width: 68ch; color: var(--ink-2); }
+.prose strong { color: var(--ink); }
+
+/* ---------- Shell ---------- */
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; }
+header.top { padding-block: 28px 18px; display: grid; gap: 10px; }
+header.top .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: 13px; }
+nav.tabs {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+nav.tabs .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
+nav.tabs a {
+  flex: none; text-decoration: none; padding: 7px 14px; border-radius: 999px;
+  font-weight: 500; font-size: 14px; color: var(--ink-2);
+}
+nav.tabs a:hover { background: var(--surface-2); color: var(--ink); }
+nav.tabs a[aria-current="page"] { background: var(--ink); color: var(--inverse); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 28px; padding-block: 24px 64px; align-items: start; }
+.layout.solo { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 1040px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+main { display: grid; gap: 28px; min-width: 0; }
+
+/* ---------- Rail ---------- */
+aside.rail {
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 64px);
+  max-height: calc(100vh - 84px); overflow: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px; display: grid; gap: 12px;
+}
+@media (max-width: 1040px) { aside.rail { position: static; max-height: none; } }
+.rail-head { display: grid; gap: 4px; }
+.rail-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.rail-list li { display: grid; grid-template-columns: 30px 1fr; gap: 8px; padding: 8px; border-radius: 8px; transition: background .25s; }
+.rail-list li.hl { background: var(--hl); }
+.rail-list .t { font-size: 13px; line-height: 1.4; }
+.rail-list .p { font-weight: 600; font-size: 13px; }
+.rail-list a.open { font-size: 12.5px; font-weight: 500; display: inline-block; margin-top: 2px; }
+
+/* ---------- Citations ---------- */
+.cites { display: inline-flex; gap: 3px; vertical-align: 2px; margin-left: 3px; flex-wrap: wrap; }
+.cite {
+  font: 500 10.5px/1 var(--mono); min-width: 20px; height: 18px; padding: 0 5px;
+  border: 1px solid var(--line-2); background: var(--surface-2); color: var(--ink-2);
+  border-radius: 5px; cursor: pointer;
+}
+.cite:hover, .cite.on { background: var(--ink); color: var(--inverse); border-color: var(--ink); }
+.srcnum {
+  font: 500 11px/1 var(--mono); display: inline-grid; place-items: center;
+  width: 26px; height: 22px; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--line-2);
+}
+.kind { font: 500 10px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 3px 5px; border-radius: 4px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.kind.primary { color: var(--ink); border-color: var(--ink-2); }
+.pop {
+  position: absolute; z-index: 60; width: min(340px, calc(100vw - 32px));
+  background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px;
+  box-shadow: var(--shadow); padding: 14px; display: grid; gap: 8px; font-size: 13.5px;
+}
+.pop .url { font: 11.5px/1.4 var(--mono); color: var(--muted); word-break: break-all; user-select: all; }
+.pop .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px;
+  border: 1px solid var(--line-2); background: var(--surface); text-decoration: none; font-weight: 500; font-size: 13px; cursor: pointer;
+}
+.btn.solid { background: var(--ink); color: var(--inverse); border-color: var(--ink); }
+.btn:hover { border-color: var(--ink); }
+
+/* ---------- Flags ---------- */
+.flag {
+  font: 500 10px/1 var(--mono); padding: 2px 4px; border-radius: 3px; margin-left: 4px;
+  border: 1px dashed var(--line-2); color: var(--ink-2); vertical-align: 1px; cursor: help; white-space: nowrap;
+}
+
+/* ---------- Blocks ---------- */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.section-head { display: grid; gap: 6px; }
+.segdot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
+.seg-A { --seg: var(--segA); } .seg-B { --seg: var(--segB); } .seg-C { --seg: var(--segC); }
+.segdot { background: var(--seg); }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.link-btn { background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; text-align: left; }
+.link-btn:hover { text-decoration-color: var(--ink); }
+
+/* Overview */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.stat { background: var(--surface); padding: 16px 18px; display: grid; gap: 4px; }
+.stat .v { font: 700 1.9rem/1 var(--display); font-variant-numeric: tabular-nums; }
+@media (max-width: 620px) { .stats { grid-template-columns: 1fr; } }
+.segcards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1180px) { .segcards { grid-template-columns: minmax(0, 1fr); } }
+.segcard { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--seg); border-radius: 12px; padding: 18px; display: grid; gap: 12px; align-content: start; }
+.segcard .names { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13.5px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13.5px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.legend-flags { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px 20px; font-size: 13.5px; color: var(--ink-2); }
+
+/* Range strips */
+.strips { display: grid; gap: 22px; }
+.strip { display: grid; gap: 6px; }
+.strip-lane { display: grid; grid-template-columns: 110px minmax(0, 1fr) 150px; gap: 12px; align-items: center; font-size: 13px; }
+@media (max-width: 620px) { .strip-lane { grid-template-columns: 70px minmax(0, 1fr); } .strip-lane .rng { grid-column: 2; } }
+.track { position: relative; height: 22px; }
+.track .base { position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--line); }
+.track .span { position: absolute; top: 7px; height: 8px; border-radius: 4px; background: var(--seg); opacity: .28; }
+.track .tick { position: absolute; top: 3px; width: 10px; height: 16px; margin-left: -5px; border-radius: 3px; background: var(--seg); border: 2px solid var(--surface); cursor: pointer; padding: 0; }
+.track .tick:hover, .track .tick:focus-visible { transform: scaleY(1.2); }
+.track .you { position: absolute; top: -2px; width: 4px; height: 26px; margin-left: -2px; background: var(--ink); border-radius: 2px; }
+.axis { position: relative; height: 16px; font: 11px/1 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
+.axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.axis span:first-child { transform: none; }
+.axis span:last-child { transform: translateX(-100%); }
+
+/* Benchmarks */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.seg-ctrl { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 10px; }
+.seg-ctrl button { border: 0; background: none; padding: 6px 12px; border-radius: 7px; cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--ink-2); }
+.seg-ctrl button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.explain { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+@media (max-width: 720px) { .explain { grid-template-columns: minmax(0, 1fr); } }
+.explain > div { display: grid; gap: 6px; align-content: start; }
+.explain .why { grid-column: 1 / -1; }
+.explain p, .explain li { color: var(--ink-2); font-size: 14px; }
+.explain ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.bars { display: grid; gap: 0; }
+.bars .row { display: grid; grid-template-columns: 200px minmax(0, 1fr) 190px; gap: 14px; align-items: center; min-height: 34px; }
+@media (max-width: 720px) { .bars .row { grid-template-columns: 110px minmax(0, 1fr) 96px; gap: 8px; } .bars .row .val .cites { display: none; } }
+.bars .row.grp { min-height: 0; padding-top: 14px; padding-bottom: 4px; border-top: 1px solid var(--line); margin-top: 6px; }
+.bars .axisrow + .grp { border-top: 0; margin-top: 0; }
+.bars .row.grp .rng { grid-column: 2 / 4; font-size: 12.5px; color: var(--muted); }
+.bars .name { font-size: 13.5px; line-height: 1.25; }
+.bars .name .scope { display: block; font-size: 11.5px; color: var(--muted); }
+.bars .bt { position: relative; height: 18px; }
+.bars .bar { position: absolute; left: 0; top: 2px; height: 14px; border-radius: 0 4px 4px 0; background: var(--seg); cursor: pointer; border: 0; padding: 0; }
+.bars .bar.derived { background: repeating-linear-gradient(135deg, var(--seg) 0 5px, color-mix(in srgb, var(--seg) 70%, var(--surface)) 5px 7px); }
+.bars .gl { position: absolute; top: -8px; bottom: -8px; width: 1px; background: var(--line); }
+.bars .ref { position: absolute; top: -10px; bottom: -10px; width: 0; border-left: 2px dashed var(--ink-2); opacity: .6; }
+.bars .nr { font-size: 12.5px; color: var(--muted); font-style: italic; line-height: 1.3; }
+.bars .val { font-size: 13.5px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.bars .axisrow .axis { height: 14px; }
+.keyline { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); align-items: center; }
+.keyline .sw { width: 22px; height: 10px; border-radius: 2px; display: inline-block; vertical-align: -1px; margin-right: 6px; background: var(--ink-2); }
+.keyline .sw.d { background: repeating-linear-gradient(135deg, var(--ink-2) 0 5px, var(--line-2) 5px 7px); }
+.keyline .sw.ref { width: 0; height: 14px; border-left: 2px dashed var(--ink-2); background: none; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11px/1.3 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); background: var(--surface); position: sticky; top: 0; white-space: nowrap; }
+th button { background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
+th button[data-dir]::after { content: attr(data-dir); margin-left: 4px; }
+td.r, th.r { text-align: right; }
+td.r { font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: var(--surface-2); }
+tbody tr:last-child td { border-bottom: 0; }
+.searchbox { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; min-width: 0; width: 240px; max-width: 100%; }
+
+/* Insights */
+.insight { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 24px; }
+@media (max-width: 1180px) { .insight { grid-template-columns: minmax(0, 1fr); } }
+.insight .txt { display: grid; gap: 12px; align-content: start; }
+.insight .take { border-left: 3px solid var(--ink); padding: 4px 0 4px 12px; color: var(--ink); font-weight: 500; font-size: 14px; }
+.viz { display: grid; gap: 8px; min-width: 0; }
+.viz svg { width: 100%; height: auto; display: block; overflow: visible; }
+.viz .keyline svg { width: 14px; height: 14px; display: inline-block; }
+.viz svg text { font-family: var(--sans); fill: var(--muted); font-size: 11px; }
+.viz svg .lbl { fill: var(--ink); font-size: 11.5px; font-weight: 500; }
+.viz svg .grid { stroke: var(--line); stroke-width: 1; }
+.viz svg .axisl { stroke: var(--line-2); }
+.viz svg .pt { stroke: var(--surface); stroke-width: 2; cursor: pointer; }
+.viz svg .hit { fill: transparent; cursor: pointer; }
+.minibars { display: grid; gap: 8px; }
+.minibars .mb { display: grid; grid-template-columns: 120px minmax(0, 1fr) 80px; gap: 10px; align-items: center; font-size: 13px; }
+.minibars .mt { position: relative; height: 14px; background: var(--surface-2); border-radius: 0 4px 4px 0; }
+.minibars .mt i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; background: var(--seg); }
+.minibars .mt i.prev { background: none; border: 2px dashed var(--seg); opacity: .6; }
+.minibars .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.minigroups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.minigroups > div { display: grid; gap: 8px; align-content: start; }
+
+/* Playbook */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; counter-increment: s; }
+.steps li::before { content: counter(s); font: 700 15px/1 var(--display); width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--ink); }
+.steps li p { color: var(--ink-2); }
+.calc { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 24px; }
+@media (max-width: 760px) { .calc { grid-template-columns: minmax(0, 1fr); } }
+.calc form { display: grid; gap: 12px; align-content: start; }
+.calc label { display: grid; gap: 4px; font-size: 13px; font-weight: 500; }
+.calc input, .calc select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; font-variant-numeric: tabular-nums; }
+.pos { font-size: 12.5px; font-weight: 600; }
+.pill { display: inline-block; font: 500 11px/1 var(--mono); padding: 4px 7px; border-radius: 999px; border: 1px solid var(--line-2); }
+.pill.lo { border-color: var(--segB); color: var(--ink); background: color-mix(in srgb, var(--segB) 16%, transparent); }
+.pill.in { border-color: var(--line-2); }
+.pill.hi { border-color: var(--good); color: var(--ink); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.example-tag { font: 500 11px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--segB); }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--ink-2); }
+
+/* Sources */
+.srclist { list-style: none; margin: 0; padding: 0; display: grid; }
+.srclist li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 14px 4px; border-bottom: 1px solid var(--line); scroll-margin-top: 80px; }
+.srclist li:target, .srclist li.hl { background: var(--hl); }
+.srclist .top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.srclist .url { font: 11.5px/1.4 var(--mono); color: var(--muted); word-break: break-all; }
+.srclist .usedby { font-size: 12.5px; color: var(--ink-2); }
+
+/* Tooltip & dialog */
+.tip {
+  position: fixed; z-index: 70; pointer-events: none; max-width: 280px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); border-radius: 8px;
+  box-shadow: var(--shadow); padding: 10px 12px; font-size: 12.5px; line-height: 1.45; display: grid; gap: 3px;
+}
+.tip b { font-size: 13px; }
+.tip .big { font: 700 16px/1.2 var(--display); font-variant-numeric: tabular-nums; }
+dialog {
+  width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line-2); border-radius: 14px;
+  background: var(--surface); color: var(--ink); box-shadow: var(--shadow);
+}
+dialog::backdrop { background: rgb(10 18 16 / .45); }
+.dlg { padding: 22px; display: grid; gap: 18px; }
+.dlg-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.mgrid > div { background: var(--surface); padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+.mgrid .v { font: 700 1.25rem/1.15 var(--display); font-variant-numeric: tabular-nums; }
+.mgrid .n { font-size: 12.5px; color: var(--ink-2); }
+footer.foot { border-top: 1px solid var(--line); padding-block: 20px 40px; color: var(--muted); font-size: 12.5px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top wrap">
+  <span class="eyebrow">Benchmark · 15 listed Indian hospital operators</span>
+  <h1>Hospital Benchmark FY26</h1>
+  <div class="meta">
+    <span>FY2025-26 (year ended 31 March 2026)</span>
+    <span>Prepared September 2026</span>
+    <span>₹ crore unless stated</span>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" id="tabs">
+    <a href="#overview">Overview</a>
+    <a href="#benchmarks">Benchmarks</a>
+    <a href="#hospitals">Hospitals</a>
+    <a href="#insights">Insights</a>
+    <a href="#playbook">How to use</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
+<div class="wrap layout">
+  <main id="view" tabindex="-1"></main>
+  <aside class="rail" id="rail" aria-label="References for this view"></aside>
+</div>
+
+<footer class="foot wrap">
+  Figures transcribed from <em>Hospital Benchmarking FY26</em> (docs/Hospital_Benchmarking_FY26.docx). Source numbers match Section 7 of that document. (d) marks figures derived from disclosed numbers.
+</footer>
+
+<div class="pop" id="pop" hidden role="dialog" aria-label="Source"></div>
+<div class="tip" id="tip" hidden></div>
+<dialog id="detail"></dialog>
+
+<script src="data.js"></script>
+<script>
+(() => {
+const B = window.BENCH;
+const H = B.hospitals;
+const SEGS = ["A", "B", "C"];
+const $ = (s, el = document) => el.querySelector(s);
+const byId = Object.fromEntries(H.map(h => [h.id, h]));
+const view = $("#view"), rail = $("#rail"), pop = $("#pop"), tip = $("#tip"), dlg = $("#detail");
+
+/* ---------- Formatting ---------- */
+const inr = v => v.toLocaleString("en-IN");
+function fmt(key, v) {
+  if (v == null) return "n.r.";
+  switch (key) {
+    case "margin": return v.toFixed(1) + "%";
+    case "occ": return (Number.isInteger(v) ? v : v.toFixed(1)) + "%";
+    case "arpob": case "rpab": return "₹" + inr(v);
+    case "rev": return "₹" + inr(v) + " Cr";
+    case "alos": return v + " days";
+    default: return String(v);
+  }
+}
+const FLAG_TEXT = {
+  d: "Derived by us from disclosed numbers",
+  approx: "Approximate, as disclosed",
+  Q4: "Q4 FY26 only, not full year",
+  "9M": "Nine months FY26 (April–December), not full year",
+  adj: "Adjusted figure as reported by the company",
+};
+function flags(m) {
+  if (!m) return "";
+  let s = "";
+  if (m.approx) s += `<span class="flag" title="${FLAG_TEXT.approx}">~</span>`;
+  if (m.d) s += `<span class="flag" title="${FLAG_TEXT.d}">d</span>`;
+  if (m.period) s += `<span class="flag" title="${FLAG_TEXT[m.period]}">${m.period}</span>`;
+  if (m.adj) s += `<span class="flag" title="${FLAG_TEXT.adj}">adj.</span>`;
+  return s;
+}
+function cite(arr) {
+  if (!arr || !arr.length) return "";
+  return `<span class="cites">${arr.map(n => `<button type="button" class="cite" data-src="${n}" aria-label="Source ${n}: ${B.sources[n].pub}">${n}</button>`).join("")}</span>`;
+}
+// Replace {5,19} tokens in prose with citation chips
+const withCites = s => s.replace(/\{([\d,\s]+)\}/g, (_, g) => cite(g.split(",").map(x => +x.trim())));
+const segName = s => B.segments[s].name;
+const msrc = (h, k) => (h[k] && h[k].src) || h.src;
+
+/* ---------- Scales ---------- */
+function niceScale(max, target = 5) {
+  const raw = max / target, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw);
+  const top = Math.ceil(max / step) * step;
+  const ticks = []; for (let t = 0; t <= top + 1e-9; t += step) ticks.push(+t.toFixed(6));
+  return { top, ticks, step };
+}
+function range(key, seg) {
+  const vals = H.filter(h => h.seg === seg).map(h => h[key].v).filter(v => v != null);
+  return vals.length ? { min: Math.min(...vals), max: Math.max(...vals), n: vals.length } : null;
+}
+const tickLabel = (key, t) => key === "arpob" || key === "rpab" ? (t === 0 ? "0" : "₹" + (t / 1000) + "k") : key === "rev" ? inr(t) : key === "alos" ? t : t + "%";
+
+/* ---------- Tooltip ---------- */
+function showTip(html, e) {
+  tip.innerHTML = html; tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let x, y;
+  if (e.clientX != null && e.type.startsWith("pointer")) { x = e.clientX + 14; y = e.clientY + 14; }
+  else { const b = e.target.getBoundingClientRect(); x = b.left; y = b.bottom + 8; }
+  if (x + r.width > innerWidth - 8) x = innerWidth - r.width - 8;
+  if (y + r.height > innerHeight - 8) y = y - r.height - 28;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+function hospTip(h, key) {
+  const m = h[key];
+  const extra = m.note || m.why || "";
+  const basis = key === "occ" && h.beds.basis ? `<span class="muted">Bed basis: ${h.beds.basis}</span>` : "";
+  return `<b>${h.name}</b><span class="muted">${segName(h.seg)}</span><span class="big">${fmt(key, m.v)}</span>${basis}${extra ? `<span>${extra}</span>` : ""}<span class="muted">Sources ${msrc(h, key).join(", ")} · click for details</span>`;
+}
+document.addEventListener("pointerover", e => {
+  const t = e.target.closest("[data-tip]");
+  if (!t) return;
+  const [id, key] = t.dataset.tip.split(":");
+  showTip(hospTip(byId[id], key), e);
+});
+document.addEventListener("pointermove", e => { if (!tip.hidden && e.target.closest("[data-tip]")) showTip(tip.innerHTML, e); });
+document.addEventListener("pointerout", e => { if (e.target.closest("[data-tip]")) hideTip(); });
+document.addEventListener("focusin", e => {
+  const t = e.target.closest("[data-tip]");
+  if (t) { const [id, key] = t.dataset.tip.split(":"); showTip(hospTip(byId[id], key), e); }
+});
+document.addEventListener("focusout", hideTip);
+
+/* ---------- Citation popover + rail ---------- */
+let activeCite = null;
+function openPop(btn) {
+  const n = +btn.dataset.src, s = B.sources[n];
+  if (activeCite) activeCite.classList.remove("on");
+  activeCite = btn; btn.classList.add("on");
+  pop.innerHTML = `
+    <div class="row"><span class="srcnum">${n}</span><strong>${s.pub}</strong><span class="kind ${s.kind}">${s.kind === "primary" ? "Filing" : "Summary"}</span></div>
+    <div>${s.t}</div>
+    <div class="url">${s.url}</div>
+    <div class="row"><a class="btn solid" href="${s.url}" target="_blank" rel="noopener noreferrer">Open source ↗</a><a class="btn" href="#sources" data-goto-src="${n}">In source list</a></div>`;
+  const inDlg = dlg.open && dlg.contains(btn);
+  (inDlg ? dlg : document.body).appendChild(pop);
+  pop.style.position = inDlg ? "fixed" : "absolute";
+  pop.hidden = false;
+  const ox = inDlg ? 0 : scrollX, oy = inDlg ? 0 : scrollY;
+  const b = btn.getBoundingClientRect(), w = pop.offsetWidth;
+  let left = b.left; if (left + w > innerWidth - 16) left = innerWidth - 16 - w;
+  let top = b.bottom + 6; if (inDlg && top + pop.offsetHeight > innerHeight - 8) top = b.top - pop.offsetHeight - 6;
+  pop.style.left = (Math.max(16, left) + ox) + "px";
+  pop.style.top = (top + oy) + "px";
+  highlightRail(n);
+}
+function closePop() { pop.hidden = true; if (activeCite) activeCite.classList.remove("on"); activeCite = null; }
+function highlightRail(n) {
+  rail.querySelectorAll("li.hl").forEach(li => li.classList.remove("hl"));
+  const li = rail.querySelector(`li[data-n="${n}"]`);
+  if (li) { li.classList.add("hl"); if (matchMedia("(min-width: 1041px)").matches) li.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+}
+document.addEventListener("click", e => {
+  const c = e.target.closest(".cite");
+  if (c) { e.stopPropagation(); e.preventDefault(); c === activeCite ? closePop() : openPop(c); return; }
+  const g = e.target.closest("[data-goto-src]");
+  if (g) { pendingSrc = +g.dataset.gotoSrc; closePop(); if (dlg.open) dlg.close(); if (location.hash === "#sources") route(); return; }
+  if (!pop.contains(e.target)) closePop();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closePop(); hideTip(); } });
+addEventListener("resize", closePop);
+
+function renderRail(title) {
+  const nums = [...new Set([...view.querySelectorAll(".cite")].map(b => +b.dataset.src))].sort((a, b) => a - b);
+  rail.innerHTML = `
+    <div class="rail-head">
+      <span class="eyebrow">References in this view · ${nums.length}</span>
+      <p class="small muted">Click a numbered chip next to any figure or claim to see its source. <strong>Filing</strong> means a company release, exchange filing or rating-agency report. <strong>Summary</strong> means a news or aggregator report of the disclosure.</p>
+    </div>
+    <ol class="rail-list">${nums.map(n => { const s = B.sources[n]; return `
+      <li data-n="${n}"><span class="srcnum">${n}</span><div>
+        <div class="row"><span class="p">${s.pub}</span> <span class="kind ${s.kind}">${s.kind === "primary" ? "Filing" : "Summary"}</span></div>
+        <div class="t">${s.t}</div>
+        <a class="open" href="${s.url}" target="_blank" rel="noopener noreferrer">Open source ↗</a>
+      </div></li>`; }).join("")}</ol>`;
+  rail.hidden = title === "sources";
+  $(".layout").classList.toggle("solo", title === "sources");
+}
+
+/* ---------- Range strip (shared by overview + calculator) ---------- */
+function stripHTML(key, opts = {}) {
+  const all = H.map(h => h[key].v).filter(v => v != null);
+  const extra = opts.you != null ? [opts.you] : [];
+  const sc = niceScale(Math.max(...all, ...extra));
+  const pct = v => (v / sc.top * 100).toFixed(2) + "%";
+  const segs = opts.segs || SEGS;
+  const lanes = segs.map(s => {
+    const r = range(key, s);
+    const ticks = H.filter(h => h.seg === s && h[key].v != null).map(h =>
+      `<button type="button" class="tick" style="left:${pct(h[key].v)}" data-tip="${h.id}:${key}" data-open="${h.id}" aria-label="${h.name}: ${fmt(key, h[key].v)}"></button>`).join("");
+    const span = r ? `<span class="span" style="left:${pct(r.min)};width:calc(${pct(r.max)} - ${pct(r.min)})"></span>` : "";
+    const you = opts.you != null ? `<span class="you" style="left:${pct(opts.you)}" title="Your figure"></span>` : "";
+    const rng = r ? `${fmt(key, r.min)} – ${fmt(key, r.max)} <span class="muted">(n=${r.n})</span>` : `<span class="muted">No comparable data</span>`;
+    return `<div class="strip-lane seg-${s}"><span><span class="segdot"></span> ${opts.short ? "Seg. " + s : B.segments[s].short}</span><div class="track"><span class="base"></span>${span}${ticks}${you}</div><span class="rng num">${rng}</span></div>`;
+  }).join("");
+  const axis = `<div class="strip-lane"><span></span><div class="axis">${sc.ticks.map(t => `<span style="left:${pct(t)}">${tickLabel(key, t)}</span>`).join("")}</div><span></span></div>`;
+  return `<div class="strip">${lanes}${axis}</div>`;
+}
+
+/* ================= VIEWS ================= */
+const views = {};
+
+views.overview = () => {
+  const segCard = s => {
+    const g = B.segments[s], hs = H.filter(h => h.seg === s);
+    const row = k => { const r = range(k, s); return `<dt>${B.metrics[k].short}</dt><dd>${r ? `${fmt(k, r.min)} – ${fmt(k, r.max)} <span class="muted">n=${r.n}</span>` : "–"}</dd>`; };
+    return `<article class="segcard seg-${s}">
+      <div class="eyebrow">Segment ${s} · ${hs.length} hospitals</div>
+      <h3>${g.name}</h3>
+      <p class="small" style="color:var(--ink-2)">${g.model} ${g.engine}</p>
+      <div class="names">${hs.map(h => `<button type="button" class="link-btn" data-open="${h.id}">${h.name}</button>`).join("")}</div>
+      <div><div class="eyebrow" style="margin-bottom:6px">Metrics that carry the diagnosis</div><div class="chips">${g.diagnostic.map(d => `<span class="chip">${d}</span>`).join("")}</div></div>
+      <dl class="kv">${["margin", "occ", "arpob", "rpab"].map(row).join("")}</dl>
+    </article>`;
+  };
+  return `
+  <section class="section-head">
+    <span class="eyebrow">1 · Purpose</span>
+    <h2>Compare hospitals by how they earn, not by what they are called</h2>
+    <p class="prose">This benchmark is built for a hospital management team that has to act on it: set occupancy and pricing targets, decide where to add beds, and understand why its margin sits where it does. It compares hospitals by <strong>economic engine</strong> rather than by label. It reports <strong>ranges, not percentiles</strong>, because no segment has the 20+ comparable entities percentiles need. It states every definition and data gap.</p>
+  </section>
+
+  <section class="panel">
+    <div class="section-head"><span class="eyebrow">Sector reference · ICRA FY26 sample of listed hospital chains ${cite(B.sector.src)}</span></div>
+    <div class="stats">
+      <div class="stat"><span class="v">${B.sector.occ}%</span><span class="small muted">Average occupancy</span></div>
+      <div class="stat"><span class="v">${B.sector.margin}%</span><span class="small muted">Average operating margin</span></div>
+      <div class="stat"><span class="v">+${B.sector.arpobGrowth}%</span><span class="small muted">ARPOB growth, year on year</span></div>
+    </div>
+  </section>
+
+  <section class="section-head">
+    <span class="eyebrow">2 · Peer set</span>
+    <h2>Three segments, because the same metric means different things in each</h2>
+    <p class="prose">A metro quaternary chain earns through price and case mix. A regional chain earns through volume and cost. A single-specialty chain runs a narrow clinical engine with its own occupancy norms.</p>
+  </section>
+  <div class="segcards">${SEGS.map(segCard).join("")}</div>
+
+  <section class="panel">
+    <div class="section-head">
+      <span class="eyebrow">Segment ranges at a glance</span>
+      <h3>Where each segment's hospitals fall</h3>
+      <p class="small muted">Each mark is one hospital; the shaded band is the segment range; <em>n</em> is the number with a comparable figure. Hover or tab to a mark for the value and its source.</p>
+    </div>
+    <div class="strips">
+      ${["margin", "occ", "arpob", "rpab"].map(k => `<div class="strip"><div class="eyebrow">${B.metrics[k].label}${k === "rpab" ? " (d)" : ""} ${k === "arpob" || k === "rpab" ? "· ₹ per day" : ""}</div>${stripHTML(k)}</div>`).join("")}
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-head"><span class="eyebrow">How to read the figures</span></div>
+    <div class="legend-flags">
+      <div><span class="flag">d</span> ${FLAG_TEXT.d}; the formula is given alongside.</div>
+      <div><span class="flag">~</span> ${FLAG_TEXT.approx}.</div>
+      <div><span class="flag">Q4</span> / <span class="flag">9M</span> Part-year figure: quarter or nine months.</div>
+      <div><span class="flag">adj.</span> ${FLAG_TEXT.adj}.</div>
+      <div><strong>n.r.</strong> Not reported by the company.</div>
+      <div><span class="srcnum" style="width:22px;height:18px">5</span> Source number from Section 7. Click it to open the source.</div>
+    </div>
+  </section>`;
+};
+
+/* ---------- Benchmarks ---------- */
+let bm = { key: "margin", sort: "seg" };
+views.benchmarks = () => {
+  const k = bm.key, M = B.metrics[k];
+  const vals = H.map(h => h[k].v).filter(v => v != null);
+  const refVal = k === "margin" ? B.sector.margin : k === "occ" ? B.sector.occ : null;
+  const sc = niceScale(Math.max(...vals, refVal || 0));
+  const pct = v => (v / sc.top * 100).toFixed(2) + "%";
+  const grid = sc.ticks.map(t => `<span class="gl" style="left:${pct(t)}"></span>`).join("") + (refVal ? `<span class="ref" style="left:${pct(refVal)}"></span>` : "");
+  const row = h => {
+    const m = h[k];
+    const name = `<div class="name"><button type="button" class="link-btn" data-open="${h.id}">${h.name}</button><span class="scope">${h.scope}${k === "occ" && h.beds.basis && h.beds.unit !== "facilities" ? " · " + h.beds.basis + " beds" : ""}</span></div>`;
+    if (m.v == null) return `<div class="row seg-${h.seg}">${name}<div class="bt" style="height:auto;min-height:18px">${grid}<span class="nr" style="position:relative;display:block">${m.why || "Not reported."}</span></div><div class="val muted">n.r.${cite(m.src)}</div></div>`;
+    return `<div class="row seg-${h.seg}">${name}<div class="bt">${grid}<button type="button" class="bar${m.d ? " derived" : ""}" style="width:${pct(m.v)}" data-tip="${h.id}:${k}" data-open="${h.id}" aria-label="${h.name} ${fmt(k, m.v)}"></button></div><div class="val">${fmt(k, m.v)}${flags(m)}${cite(msrc(h, k))}</div></div>`;
+  };
+  const axis = `<div class="row axisrow"><span></span><div class="axis">${sc.ticks.map(t => `<span style="left:${pct(t)}">${tickLabel(k, t)}</span>`).join("")}</div><span></span></div>`;
+  let body = "";
+  if (bm.sort === "seg") {
+    body = SEGS.map(s => {
+      const r = range(k, s);
+      const hs = H.filter(h => h.seg === s).sort((a, b) => (b[k].v ?? -1) - (a[k].v ?? -1));
+      return `<div class="row grp seg-${s}"><strong style="display:flex;gap:8px;align-items:center"><span class="segdot"></span>Segment ${s}</strong><span class="rng">${segName(s)}${r && k !== "alos" ? ` · range <strong class="num" style="color:var(--ink)">${fmt(k, r.min)} – ${fmt(k, r.max)}</strong> (n=${r.n})` : r ? ` · n=${r.n}` : ""}</span></div>${hs.map(row).join("")}`;
+    }).join("");
+  } else {
+    const hs = [...H].sort((a, b) => (b[k].v ?? -1) - (a[k].v ?? -1));
+    body = hs.map(row).join("");
+  }
+  const metricBtns = Object.entries(B.metrics).map(([key, m]) => `<button type="button" data-metric="${key}" aria-pressed="${key === k}">${m.short}</button>`).join("");
+  return `
+  <section class="section-head">
+    <span class="eyebrow">4 · Benchmark tables</span>
+    <h2>${M.label}</h2>
+  </section>
+  <div class="controls">
+    <div class="seg-ctrl" role="group" aria-label="Metric">${metricBtns}</div>
+    <div class="seg-ctrl" role="group" aria-label="Order">
+      <button type="button" data-sort="seg" aria-pressed="${bm.sort === "seg"}">By segment</button>
+      <button type="button" data-sort="all" aria-pressed="${bm.sort === "all"}">Rank all 15</button>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="explain">
+      <div><span class="eyebrow">Definition used</span><p>${M.definition}</p></div>
+      <div><span class="eyebrow">What a gap means</span><p>${M.gap}</p></div>
+      <div class="why"><span class="eyebrow">Why it matters</span><p>${M.why}</p></div>
+      <div class="why"><span class="eyebrow">Comparability watch-outs</span><ul>${M.watch.map(w => `<li>${w.t}${w.ref ? ` <a href="#insights" data-insight="${w.ref}">See ${w.ref}</a>` : ""}${cite(w.src)}</li>`).join("")}</ul></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="keyline">
+      ${SEGS.map(s => `<span class="seg-${s}"><span class="segdot" style="margin-right:6px"></span>Segment ${s}</span>`).join("")}
+      <span><span class="sw d"></span>Derived (d)</span>
+      ${refVal ? `<span><span class="sw ref"></span> ICRA sample average ${refVal}% ${cite(B.sector.src)}</span>` : ""}
+    </div>
+    <div class="bars">${axis}${body}</div>
+    <p class="small muted">Click a hospital or bar for every metric, note and source for that hospital. Rows marked n.r. show why the figure is missing rather than dropping the hospital.</p>
+  </section>`;
+};
+
+/* ---------- Hospitals table ---------- */
+let ht = { seg: "all", q: "", sort: "seg", dir: 1 };
+const COLS = [
+  ["name", "Hospital"], ["seg", "Seg."], ["rev", "Revenue ₹ Cr", 1], ["margin", "EBITDA margin", 1], ["beds", "Beds (basis)", 1],
+  ["occ", "Occupancy", 1], ["arpob", "ARPOB ₹/day", 1], ["rpab", "Rev/avail. bed-day", 1], ["alos", "ALOS", 1], ["src", "Sources"],
+];
+views.hospitals = () => {
+  let rows = H.filter(h => (ht.seg === "all" || h.seg === ht.seg) && (h.name + " " + h.scope).toLowerCase().includes(ht.q.toLowerCase()));
+  const val = (h, c) => c === "name" ? h.name : c === "seg" ? h.seg + h.name : h[c] && h[c].v;
+  rows.sort((a, b) => {
+    const x = val(a, ht.sort), y = val(b, ht.sort);
+    if (x == null) return 1; if (y == null) return -1;
+    return (typeof x === "string" ? x.localeCompare(y) : x - y) * ht.dir;
+  });
+  const cell = (h, k) => { const m = h[k]; return m.v == null ? `<span class="muted" title="${m.why || ""}">n.r.</span>` : fmt(k, m.v) + flags(m); };
+  const head = COLS.map(([c, l, r]) => `<th class="${r ? "r" : ""}">${c === "src" ? l : `<button type="button" data-hsort="${c}" ${ht.sort === c ? `data-dir="${ht.dir > 0 ? "↑" : "↓"}"` : ""}>${l}</button>`}</th>`).join("");
+  const body = rows.map(h => `<tr data-open="${h.id}" class="seg-${h.seg}">
+    <td><strong>${h.name}</strong><div class="small muted">${h.scope}</div></td>
+    <td><span class="segdot"></span> ${h.seg}</td>
+    <td class="r">${inr(h.rev.v)}</td>
+    <td class="r">${cell(h, "margin")}</td>
+    <td class="r">${(h.beds.approx ? "~" : "") + inr(h.beds.v)}${h.beds.d ? '<span class="flag" title="' + FLAG_TEXT.d + '">d</span>' : ""}<div class="small muted">${h.beds.basis}</div></td>
+    <td class="r">${cell(h, "occ")}</td>
+    <td class="r">${cell(h, "arpob")}</td>
+    <td class="r">${cell(h, "rpab")}</td>
+    <td class="r">${h.alos.v != null ? h.alos.v : '<span class="muted">n.r.</span>'}</td>
+    <td>${cite(h.src)}</td></tr>`).join("");
+  return `
+  <section class="section-head">
+    <span class="eyebrow">All 15 hospitals</span>
+    <h2>Every figure, with its basis and source</h2>
+    <p class="prose small">Sort by any column. Click a row for that hospital's notes, per-metric sources and position in its segment.</p>
+  </section>
+  <div class="controls">
+    <div class="seg-ctrl" role="group" aria-label="Segment filter">
+      ${[["all", "All 15"], ["A", "Seg. A"], ["B", "Seg. B"], ["C", "Seg. C"]].map(([v, l]) => `<button type="button" data-hseg="${v}" aria-pressed="${ht.seg === v}">${l}</button>`).join("")}
+    </div>
+    <input id="hq" class="searchbox" type="search" placeholder="Search hospitals" value="${ht.q}" aria-label="Search hospitals">
+  </div>
+  <div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="10" class="muted">No hospital matches “${ht.q}”.</td></tr>`}</tbody></table></div>
+  <section class="panel">
+    <span class="eyebrow">Table notes</span>
+    <ul class="plain small">
+      <li>Apollo stopped reporting ARPOB in FY26 and now reports average revenue per patient (₹1,87,208 in Q4 FY26).${cite([3, 4])}</li>
+      <li>Fortis ARPOB = ₹2.51 Cr p.a. ÷ 365; Narayana = ₹17.9 Mn p.a. ÷ 365.${cite([7, 12])}</li>
+      <li>Max revenue is the network basis, which includes partner facilities it does not consolidate.${cite([5])}</li>
+      <li>Aster figures are standalone. Its merger with Quality Care India (combined ~10,623 beds, ₹9,273 Cr proforma revenue) was expected to close in Q1 FY27.${cite([14])}</li>
+      <li>Dr Agarwal's is a day-care model: 288 facilities, ≈ ₹42,900 revenue per surgery (d).${cite([31, 32])}</li>
+      <li>Shalby margin, occupancy and ARPOB are Q4 FY26; beds derived as 649 occupied ÷ 48%.${cite([34, 35])}</li>
+    </ul>
+  </section>`;
+};
+
+/* ---------- Insights ---------- */
+function scatter({ xKey, yKey, xLabel, yLabel, label = [], note }) {
+  const pts = H.filter(h => h[xKey].v != null && h[yKey].v != null);
+  const W = 620, Hh = 340, m = { l: 48, r: 16, t: 14, b: 44 };
+  const xs = niceScale(Math.max(...pts.map(h => h[xKey].v)), 5), ys = niceScale(Math.max(...pts.map(h => h[yKey].v)), 5);
+  const xMin = xKey === "occ" ? 40 : 0, yMin = 0;
+  const X = v => m.l + (v - xMin) / (xs.top - xMin) * (W - m.l - m.r);
+  const Y = v => Hh - m.b - (v - yMin) / (ys.top - yMin) * (Hh - m.t - m.b);
+  const xt = xs.ticks.filter(t => t >= xMin);
+  let s = `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${yLabel} against ${xLabel}">`;
+  ys.ticks.forEach(t => { s += `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(t)}" y2="${Y(t)}"/><text x="${m.l - 8}" y="${Y(t) + 4}" text-anchor="end">${tickLabel(yKey, t)}</text>`; });
+  xt.forEach(t => { s += `<line class="grid" y1="${m.t}" y2="${Hh - m.b}" x1="${X(t)}" x2="${X(t)}"/><text x="${X(t)}" y="${Hh - m.b + 16}" text-anchor="middle">${tickLabel(xKey, t)}</text>`; });
+  s += `<text x="${(m.l + W - m.r) / 2}" y="${Hh - 6}" text-anchor="middle">${xLabel}</text>`;
+  s += `<text transform="translate(12 ${(m.t + Hh - m.b) / 2}) rotate(-90)" text-anchor="middle">${yLabel}</text>`;
+  pts.forEach(h => {
+    const cx = X(h[xKey].v), cy = Y(h[yKey].v);
+    s += `<circle class="pt" cx="${cx}" cy="${cy}" r="6.5" style="fill:var(--seg${h.seg})"/>`;
+    if (label.includes(h.id)) {
+      const right = cx < W - 110;
+      s += `<text class="lbl" x="${cx + (right ? 11 : -11)}" y="${cy + 4}" text-anchor="${right ? "start" : "end"}">${h.name.split(" ")[0]}</text>`;
+    }
+    s += `<circle class="hit" cx="${cx}" cy="${cy}" r="14" data-tip="${h.id}:${yKey}" data-open="${h.id}" tabindex="0" role="button" aria-label="${h.name}: ${fmt(xKey, h[xKey].v)}, ${fmt(yKey, h[yKey].v)}"/>`;
+  });
+  s += `</svg>`;
+  const legend = `<div class="keyline">${SEGS.map(x => `<span class="seg-${x}"><span class="segdot" style="margin-right:6px"></span>${B.segments[x].short}</span>`).join("")}</div>`;
+  return `<div class="viz">${legend}${s}${note ? `<p class="small muted">${note}</p>` : ""}</div>`;
+}
+function dumbbell() {
+  const W = 620, rowH = 46, m = { l: 96, r: 60, t: 22, b: 30 }, Hh = m.t + m.b + rowH * B.mature.length;
+  const lo = 15, hi = 35, X = v => m.l + (v - lo) / (hi - lo) * (W - m.l - m.r);
+  let s = `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Group margin against mature-unit margin">`;
+  for (let t = lo; t <= hi; t += 5) s += `<line class="grid" x1="${X(t)}" x2="${X(t)}" y1="${m.t - 6}" y2="${Hh - m.b}"/><text x="${X(t)}" y="${Hh - m.b + 16}" text-anchor="middle">${t}%</text>`;
+  B.mature.forEach((d, i) => {
+    const y = m.t + i * rowH + rowH / 2, h = byId[d.id], c = `var(--seg${h.seg})`;
+    s += `<text class="lbl" x="0" y="${y + 4}">${d.name}</text>`;
+    s += `<line x1="${X(d.blended)}" x2="${X(d.mature)}" y1="${y}" y2="${y}" style="stroke:${c}" stroke-width="2" opacity=".55"/>`;
+    s += `<circle cx="${X(d.blended)}" cy="${y}" r="6.5" style="fill:var(--surface);stroke:${c}" stroke-width="2.5"/>`;
+    s += `<circle class="pt" cx="${X(d.mature)}" cy="${y}" r="7" style="fill:${c}"/>`;
+    s += `<text x="${X(d.mature) + 12}" y="${y + 4}" class="lbl">+${(d.mature - d.blended).toFixed(1)} pts</text>`;
+    const close = d.mature - d.blended < 3;
+    s += `<text x="${X(d.blended)}" y="${close ? y + 20 : y - 12}" text-anchor="middle">${d.blended}%</text><text x="${X(d.mature)}" y="${y - 12}" text-anchor="middle">${d.mature}%</text>`;
+  });
+  s += `</svg>`;
+  const legend = `<div class="keyline"><span><svg width="14" height="14" style="vertical-align:-2px;margin-right:6px"><circle cx="7" cy="7" r="5" style="fill:none;stroke:var(--ink-2)" stroke-width="2"/></svg>Group / blended margin</span><span><svg width="14" height="14" style="vertical-align:-2px;margin-right:6px"><circle cx="7" cy="7" r="6" style="fill:var(--ink-2)"/></svg>Mature or established units</span></div>`;
+  const rows = B.mature.map(d => `<li><strong>${d.name}</strong>: ${d.label} ${d.mature}% vs ${d.blended}% group${d.extra ? `. ${d.extra}` : ""}.${cite(d.src)}</li>`).join("")
+    + B.matureOther.map(d => `<li><strong>${d.name}</strong>: ${d.t}${cite(d.src)}</li>`).join("");
+  return `<div class="viz">${legend}${s}<ul class="plain small">${rows}</ul></div>`;
+}
+function minibars(title, items, max, unit, showPrev) {
+  return `<div><span class="eyebrow">${title}</span><div class="minibars">${items.map(d => {
+    const h = byId[d.id];
+    return `<div class="mb seg-${h.seg}"><span>${d.name}${d.note ? `<span class="small muted"> (${d.note})</span>` : ""}</span><div class="mt">${showPrev && d.prev ? `<i class="prev" style="width:${d.prev / max * 100}%"></i>` : ""}<i style="width:${Math.max(d.v / max * 100, 1)}%"></i></div><span class="v">${d.approx ? "~" : ""}${d.v}${unit}${cite(d.src)}</span></div>`;
+  }).join("")}</div></div>`;
+}
+const INSIGHTS = [
+  {
+    id: "5.1", h: "Price and volume are two routes to the same margin",
+    p: "ARPOB alone does not predict profitability. Park Medi World earns a 26.5% margin at an ARPOB of ₹28,005, the lowest in the set, while Max earns 26.2% at ₹77,800 and Artemis 20.2% at ₹82,435, a single Gurugram hospital where international patients bring in roughly a third of revenue.{5,19,25,26} The difference is cost per occupied bed-day, which none of these companies discloses.",
+    take: "The first question is not “is our ARPOB low?” but “which of the two engines are we running, and is our cost base built for it?”",
+    viz: () => scatter({ xKey: "arpob", yKey: "margin", xLabel: "ARPOB, ₹ per occupied bed-day", yLabel: "EBITDA margin", label: ["park", "max", "artemis", "rainbow", "shalby"], note: "Apollo (ARPOB withdrawn) and Dr Agarwal's (day-care) are not plotted. HCG is 9M and Shalby is Q4." }),
+  },
+  {
+    id: "5.2", h: "New capacity hides mature-unit economics",
+    p: "Most of the set is in heavy expansion, and group margins mix ramping units with mature ones. Where companies split them out, the gap is large. Benchmarking a hospital's blended margin against these group figures understates what a mature unit should earn by roughly 1 to 8 points, depending on how much new capacity the group is carrying.",
+    take: "Compare mature units with mature units, and track new units on a ramp curve (occupancy and margin by months since opening).",
+    viz: dumbbell,
+  },
+  {
+    id: "5.3", h: "Occupancy is only comparable within a model",
+    p: "Rainbow runs at 46.3% occupancy yet posts the highest margin in the set (32.0%), because paediatric demand is seasonal and stays are short.{27} KIMS reports 50.5% on operational beds while Yatharth reports 68% and Medanta about 62% on capacity-type bases.{9,17,22}",
+    take: "Set an occupancy target against peers with the same specialty mix and the same bed definition, or use revenue per available bed-day, which is less sensitive to how beds are counted.",
+    viz: () => scatter({ xKey: "occ", yKey: "margin", xLabel: "Occupancy (each company's own bed basis)", yLabel: "EBITDA margin", label: ["rainbow", "kims", "max", "yatharth", "medanta"], note: "Hover a point for its bed basis. Apollo occupancy is Q4 and HCG is 9M. Narayana does not disclose occupancy." }),
+  },
+  {
+    id: "5.4", h: "Payer mix drives working capital as much as margin",
+    p: "Government-scheme exposure varies widely: around 35% of revenue at Yatharth, 33% at HCG and 18% (schemes) at Narayana, against about 1% at Jupiter, where insurance is 55.4%.{12,21,24,28} The cost shows up in receivables: Park's debtor days were 129 at March 2026 (down from 161), against Max's 87.{5,20} Cash conversion is the check. Yatharth converted 98% of EBITDA to operating cash flow in FY26 and HCG 75%.{23,28}",
+    take: "Put debtor days and OCF/EBITDA next to your margin. A margin that does not convert to cash is not comparable to one that does.",
+    viz: () => `<div class="viz minigroups">
+      ${minibars("Government schemes, % of revenue", B.govtShare, 40, "%")}
+      ${minibars("Debtor days, March 2026", B.debtorDays, 180, "", true)}
+      ${minibars("Operating cash flow ÷ EBITDA", B.cashConv, 100, "%")}
+      <p class="small muted">Dashed outline on Park shows the previous figure (161 days).</p></div>`,
+  },
+  {
+    id: "5.5", h: "Reported metrics are not defined the same way",
+    p: "Apollo has withdrawn ARPOB.{4} Fortis and Narayana report it per year, not per day.{7,12} Max's ARPOB uses gross revenue and its financials include partner facilities it does not own.{5} Bed counts mix operational, census and capacity bases.",
+    take: "These are presentation choices, not errors. They mean the tables support ranges and direction, not a precise ranking.",
+    viz: () => `<div class="tbl-wrap"><table><thead><tr><th>Who</th><th>Difference</th><th>Source</th></tr></thead><tbody style="cursor:default">${B.quirks.map(q => `<tr style="cursor:default"><td><strong>${q.who}</strong></td><td>${q.what}</td><td>${cite(q.src) || '<span class="muted small">Tables above</span>'}</td></tr>`).join("")}</tbody></table></div>`,
+  },
+];
+views.insights = () => `
+  <section class="section-head">
+    <span class="eyebrow">5 · What the benchmark shows</span>
+    <h2>Five findings, each with the evidence behind it</h2>
+  </section>
+  ${INSIGHTS.map(i => `<section class="panel" id="ins-${i.id.replace(".", "-")}">
+    <div class="insight">
+      <div class="txt"><span class="eyebrow">${i.id}</span><h3>${i.h}</h3><p class="prose">${withCites(i.p)}</p><p class="take">${i.take}</p></div>
+      ${i.viz()}
+    </div></section>`).join("")}`;
+
+/* ---------- Playbook ---------- */
+const CALC_DEFAULT = { seg: "B", margin: 21, occ: 58, arpob: 40000, example: true };
+let calc = (() => { try { return JSON.parse(localStorage.getItem("hb-calc")) || { ...CALC_DEFAULT }; } catch { return { ...CALC_DEFAULT }; } })();
+function calcOut() {
+  const rpab = calc.arpob && calc.occ ? Math.round(calc.arpob * calc.occ / 100) : null;
+  const yours = { margin: calc.margin, occ: calc.occ, arpob: calc.arpob, rpab };
+  return ["margin", "occ", "arpob", "rpab"].map(k => {
+    const r = range(k, calc.seg), y = yours[k];
+    let pill = "";
+    if (y != null && !isNaN(y) && r) pill = y < r.min ? `<span class="pill lo">Below segment range</span>` : y > r.max ? `<span class="pill hi">Above segment range</span>` : `<span class="pill in">Within range</span>`;
+    return `<div class="strip"><div class="controls" style="justify-content:space-between"><span class="eyebrow">${B.metrics[k].label}${k === "rpab" ? " (ARPOB × occupancy)" : ""}</span><span class="pos">You: ${y != null && !isNaN(y) ? fmt(k, k === "occ" || k === "margin" ? +y : Math.round(y)) : "–"} ${pill}</span></div>${stripHTML(k, { segs: [calc.seg], you: y != null && !isNaN(y) ? +y : null, short: true })}</div>`;
+  }).join("");
+}
+views.playbook = () => `
+  <section class="section-head">
+    <span class="eyebrow">6 · How a hospital should use this</span>
+    <h2>Five steps from benchmark to action</h2>
+  </section>
+  <section class="panel">
+    <ol class="steps">${B.playbook.map(s => `<li><div><h3>${s.h}</h3><p>${s.t}</p></div></li>`).join("")}</ol>
+  </section>
+
+  <section class="panel">
+    <div class="section-head">
+      <span class="eyebrow">Step 1 in practice</span>
+      <h3>Where would your hospital sit?</h3>
+      <p class="small muted">Enter your own figures to place them against the range for your segment. Nothing leaves this page.</p>
+    </div>
+    <div class="calc">
+      <form id="calc" autocomplete="off">
+        <span class="example-tag" id="exTag" ${calc.example ? "" : "hidden"}>Example figures · replace with yours</span>
+        <label for="c-seg">Your operating model
+          <select id="c-seg">${SEGS.map(s => `<option value="${s}" ${calc.seg === s ? "selected" : ""}>${s}. ${B.segments[s].name}</option>`).join("")}</select></label>
+        <label for="c-margin">EBITDA margin (%)<input id="c-margin" type="number" step="0.1" inputmode="decimal" value="${calc.margin ?? ""}"></label>
+        <label for="c-occ">Occupancy (%)<input id="c-occ" type="number" step="0.1" inputmode="decimal" value="${calc.occ ?? ""}"></label>
+        <label for="c-arpob">ARPOB (₹ per occupied bed-day)<input id="c-arpob" type="number" step="100" inputmode="numeric" value="${calc.arpob ?? ""}"></label>
+        <p class="small muted">Use mature units only for margin (step 3). State your bed basis before comparing occupancy (step 5).</p>
+        <button type="button" class="btn" id="c-reset">Reset to example</button>
+      </form>
+      <div class="strips" id="calcOut">${calcOut()}</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <span class="eyebrow">Limitations</span>
+    <ul class="plain">${B.limitations.map(l => `<li>${l}</li>`).join("")}</ul>
+  </section>`;
+
+/* ---------- Sources ---------- */
+let sf = { kind: "all", q: "" };
+let pendingSrc = null;
+function usedBy() {
+  const map = {};
+  const add = (arr, label) => (arr || []).forEach(n => { (map[n] = map[n] || new Set()).add(label); });
+  H.forEach(h => {
+    add(h.src, h.name);
+    ["rev", "margin", "beds", "occ", "arpob", "rpab", "alos"].forEach(k => add(h[k] && h[k].src, h.name));
+    h.notes.forEach(n => add(n.src, h.name));
+  });
+  add(B.sector.src, "Sector averages");
+  INSIGHTS.forEach(i => { (i.p.match(/\{[\d,\s]+\}/g) || []).forEach(g => add(g.slice(1, -1).split(",").map(x => +x.trim()), "Insight " + i.id)); });
+  B.mature.forEach(d => add(d.src, "Insight 5.2"));
+  B.matureOther.forEach(d => add(d.src, "Insight 5.2"));
+  B.quirks.forEach(d => add(d.src, "Insight 5.5"));
+  Object.values(B.metrics).forEach(m => m.watch.forEach(w => add(w.src, m.label + " notes")));
+  return map;
+}
+views.sources = () => {
+  const ub = usedBy();
+  const items = Object.entries(B.sources).filter(([n, s]) => (sf.kind === "all" || s.kind === sf.kind) && (n + " " + s.pub + " " + s.t).toLowerCase().includes(sf.q.toLowerCase()));
+  const count = k => Object.values(B.sources).filter(s => s.kind === k).length;
+  return `
+  <section class="section-head">
+    <span class="eyebrow">7 · Sources</span>
+    <h2>All ${Object.keys(B.sources).length} sources, and what each one supports</h2>
+    <p class="prose small">Numbers match Section 7 of the analysis. Where a primary filing could not be opened, the closest verbatim secondary report was used. Links open the original page in a new tab. Some aggregator pages may need a login or may have moved since September 2026.</p>
+  </section>
+  <div class="controls">
+    <div class="seg-ctrl" role="group" aria-label="Source type">
+      ${[["all", `All ${Object.keys(B.sources).length}`], ["primary", `Filings · ${count("primary")}`], ["secondary", `Summaries · ${count("secondary")}`]].map(([v, l]) => `<button type="button" data-skind="${v}" aria-pressed="${sf.kind === v}">${l}</button>`).join("")}
+    </div>
+    <input id="sq" class="searchbox" type="search" placeholder="Search sources" value="${sf.q}" aria-label="Search sources">
+  </div>
+  <section class="panel" style="padding-block:6px">
+    <ol class="srclist">${items.map(([n, s]) => `
+      <li id="src-${n}"><span class="srcnum">${n}</span><div style="display:grid;gap:4px;min-width:0">
+        <div class="top"><strong>${s.pub}</strong><span class="kind ${s.kind}">${s.kind === "primary" ? "Filing" : "Summary"}</span></div>
+        <div>${s.t}</div>
+        <div class="url">${s.url}</div>
+        <div class="usedby">Supports: ${ub[n] ? [...ub[n]].join(" · ") : "—"}</div>
+        <div><a class="btn" href="${s.url}" target="_blank" rel="noopener noreferrer">Open source ↗</a></div>
+      </div></li>`).join("") || `<li><span></span><span class="muted">No source matches “${sf.q}”.</span></li>`}
+    </ol>
+  </section>
+  <p class="small muted">Method frameworks: internal benchmarking series, parts 1–4 (How to Benchmark a Business; The Metrics That Actually Carry a Diagnosis; When Revenue Multiples Apply; MCA Data Is a Good Starting Point).</p>`;
+};
+
+/* ---------- Hospital detail ---------- */
+function rankIn(h, k) {
+  if (h[k].v == null) return "";
+  const peers = H.filter(x => x.seg === h.seg && x[k].v != null).sort((a, b) => b[k].v - a[k].v);
+  return `${peers.indexOf(h) + 1} of ${peers.length} in segment`;
+}
+function openDetail(id) {
+  const h = byId[id]; if (!h) return;
+  closePop(); hideTip();
+  const cell = (k, label) => {
+    const m = h[k];
+    return `<div><span class="eyebrow">${label}</span><span class="v">${m.v == null ? "n.r." : fmt(k, m.v)}${flags(m)}</span>
+      ${m.v == null ? `<span class="n">${m.why || "Not reported."}</span>` : `<span class="small muted">${k !== "rev" ? rankIn(h, k) : h.rev.note || ""}</span>`}
+      ${m.note ? `<span class="n">${m.note}</span>` : ""}<span>${cite(msrc(h, k))}</span></div>`;
+  };
+  dlg.innerHTML = `<div class="dlg seg-${h.seg}">
+    <div class="dlg-head"><div style="display:grid;gap:6px"><span class="eyebrow"><span class="segdot"></span> Segment ${h.seg} · ${segName(h.seg)}</span><h2>${h.name}</h2><span class="muted small">${h.scope}${h.specialty && h.specialty !== h.scope ? " · " + h.specialty : ""}</span></div>
+      <button type="button" class="btn" id="dlgClose" aria-label="Close">Close</button></div>
+    <div class="mgrid">
+      ${cell("rev", "Revenue")}${cell("margin", "EBITDA margin")}
+      <div><span class="eyebrow">${h.beds.unit === "facilities" ? "Facilities" : "Beds"}</span><span class="v">${(h.beds.approx ? "~" : "") + inr(h.beds.v)}${h.beds.d ? '<span class="flag">d</span>' : ""}</span><span class="n">Basis: ${h.beds.basis}${h.beds.note ? ". " + h.beds.note : ""}</span><span>${cite(msrc(h, "beds"))}</span></div>
+      ${cell("occ", "Occupancy")}${cell("arpob", "ARPOB ₹/day")}${cell("rpab", "Rev / avail. bed-day")}${cell("alos", "ALOS")}
+      ${h.extra ? `<div><span class="eyebrow">${h.extra.label}</span><span class="v">₹${inr(h.extra.v)}</span><span class="n">${h.extra.formula}</span><span>${cite(h.src)}</span></div>` : ""}
+    </div>
+    <div style="display:grid;gap:8px"><span class="eyebrow">Notes</span><ul class="plain">${h.notes.map(n => `<li>${n.t}${cite(n.src)}</li>`).join("")}</ul></div>
+  </div>`;
+  if (!dlg.open) dlg.showModal();
+  $("#dlgClose").onclick = () => dlg.close();
+}
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+dlg.addEventListener("close", closePop);
+
+/* ---------- Interaction wiring ---------- */
+view.addEventListener("click", e => {
+  const t = e.target;
+  if (t.closest(".cite")) return;
+  const mb = t.closest("[data-metric]"); if (mb) { bm.key = mb.dataset.metric; return render(true); }
+  const sb = t.closest("[data-sort]"); if (sb) { bm.sort = sb.dataset.sort; return render(true); }
+  const hs = t.closest("[data-hseg]"); if (hs) { ht.seg = hs.dataset.hseg; return render(true); }
+  const hc = t.closest("[data-hsort]"); if (hc) { const c = hc.dataset.hsort; ht.dir = ht.sort === c ? -ht.dir : (c === "name" || c === "seg" ? 1 : -1); ht.sort = c; return render(true); }
+  const sk = t.closest("[data-skind]"); if (sk) { sf.kind = sk.dataset.skind; return render(true); }
+  const ins = t.closest("[data-insight]"); if (ins) { pendingIns = ins.dataset.insight; return; }
+  if (t.id === "c-reset") { calc = { ...CALC_DEFAULT }; saveCalc(); return render(true); }
+  const op = t.closest("[data-open]"); if (op) openDetail(op.dataset.open);
+});
+view.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches("circle[data-open], tr[data-open]")) { e.preventDefault(); openDetail(e.target.dataset.open); }
+});
+view.addEventListener("input", e => {
+  if (e.target.id === "hq") { ht.q = e.target.value; rerenderKeepFocus("hq"); }
+  if (e.target.id === "sq") { sf.q = e.target.value; rerenderKeepFocus("sq"); }
+  if (e.target.closest("#calc")) {
+    calc = { seg: $("#c-seg").value, margin: parseFloat($("#c-margin").value), occ: parseFloat($("#c-occ").value), arpob: parseFloat($("#c-arpob").value), example: false };
+    $("#exTag").hidden = true;
+    saveCalc();
+    $("#calcOut").innerHTML = calcOut();
+  }
+});
+function saveCalc() { try { localStorage.setItem("hb-calc", JSON.stringify(calc)); } catch {} }
+function rerenderKeepFocus(id) {
+  const el = $("#" + id), pos = el.selectionStart;
+  render(true);
+  const n = $("#" + id); n.focus(); try { n.setSelectionRange(pos, pos); } catch {}
+}
+
+/* ---------- Router ---------- */
+let pendingIns = null;
+const ORDER = ["overview", "benchmarks", "hospitals", "insights", "playbook", "sources"];
+function current() { const h = location.hash.slice(1); return ORDER.includes(h) ? h : "overview"; }
+function render(keepScroll) {
+  const name = current();
+  closePop(); hideTip();
+  const y = scrollY;
+  view.innerHTML = views[name]();
+  renderRail(name);
+  document.querySelectorAll("#tabs a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + name ? "page" : "false"));
+  if (keepScroll) scrollTo(0, y);
+  try { localStorage.setItem("hb-bm", JSON.stringify(bm)); } catch {}
+}
+function route() {
+  render(false);
+  const name = current();
+  if (name === "sources" && pendingSrc) {
+    const li = $("#src-" + pendingSrc);
+    if (li) { li.classList.add("hl"); li.scrollIntoView({ block: "center" }); }
+    pendingSrc = null; return;
+  }
+  if (name === "insights" && pendingIns) {
+    const el = $("#ins-" + pendingIns.replace(".", "-")); pendingIns = null;
+    if (el) { el.scrollIntoView({ block: "start" }); scrollBy(0, -70); return; }
+  }
+  const nav = document.querySelector("nav.tabs");
+  if (scrollY > nav.offsetTop) scrollTo(0, nav.offsetTop);
+}
+try { const s = JSON.parse(localStorage.getItem("hb-bm")); if (s && B.metrics[s.key]) bm = s; } catch {}
+addEventListener("hashchange", route);
+route();
+})();
+</script>
