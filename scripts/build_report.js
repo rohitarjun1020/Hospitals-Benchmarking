@@ -332,5 +332,9 @@ const doc = new Document({
   ],
 });
 
-const out = path.join(__dirname, "..", "docs", "Hospital_Benchmarking_FY26_revised.docx");
-Packer.toBuffer(doc).then(buf => { fs.writeFileSync(out, buf); console.log("Wrote " + out); });
+module.exports = { runs, P, H1, H2, Caption, Note, Bullet, table, S, gap, SRC, W_PORTRAIT, W_LANDSCAPE, A4, MARGIN, FONT };
+
+if (require.main === module) {
+  const out = path.join(__dirname, "..", "docs", "Hospital_Benchmarking_FY26_revised.docx");
+  Packer.toBuffer(doc).then(buf => { fs.writeFileSync(out, buf); console.log("Wrote " + out); });
+}
